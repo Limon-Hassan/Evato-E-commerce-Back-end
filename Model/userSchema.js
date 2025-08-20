@@ -5,12 +5,16 @@ var userSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
+      trim: true,
       index: true,
     },
     email: {
       type: String,
       required: true,
       unique: true,
+      trim: true,
+      set: v => (typeof v === 'string' ? v.replace(/\s+/g, '') : v),
+      match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email'],
     },
     password: {
       type: String,
