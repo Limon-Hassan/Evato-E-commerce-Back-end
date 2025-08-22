@@ -29,6 +29,11 @@ var userSchema = new mongoose.Schema(
     Address: {
       type: String,
     },
+    Roll: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+    },
   },
   {
     timestamps: true,

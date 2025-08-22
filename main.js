@@ -1,8 +1,10 @@
 let express = require('express');
 require('dotenv').config();
+var cookieParser = require('cookie-parser');
 const router = require('./Router/main');
 const dbConnection = require('./Config/dbconfig');
 let app = express();
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(router);
