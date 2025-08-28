@@ -20,8 +20,12 @@ var userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    Otp: {
-      type: Number,
+    otp: {
+      type: String,
+    },
+    isVerify: {
+      type: Boolean,
+      default: false,
     },
     Phone: {
       type: Number,
@@ -31,8 +35,8 @@ var userSchema = new mongoose.Schema(
     },
     Roll: {
       type: String,
-      enum: ["user", "admin"],
-      default: "user",
+      enum: ['user', 'admin'],
+      default: 'user',
     },
   },
   {

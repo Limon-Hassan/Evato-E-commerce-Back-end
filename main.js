@@ -7,8 +7,12 @@ let app = express();
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(express.static('uploads'));
 app.use(router);
 dbConnection();
+app.get('/', (req, res) => {
+  res.send('Hello World !');
+});
 let PORT = process.env.MY_SERVER_PORT || 5990;
 app.listen(PORT, () => {
   console.log('Server Is Ready ! ' + PORT);

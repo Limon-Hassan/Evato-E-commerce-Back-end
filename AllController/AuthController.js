@@ -1,6 +1,7 @@
 const userSchema = require('../Model/userSchema');
 const bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
+const sendEmailer = require('../Halper/sendEmail');
 
 async function registation(req, res) {
   let { name, email, password } = req.body;
@@ -12,6 +13,7 @@ async function registation(req, res) {
   if (existingUser) {
     res.send({ msg: 'Email Already Exists !' });
   }
+
   try {
     bcrypt.hash(password, 10, async function (err, hash) {
       let Users = new userSchema({
@@ -20,6 +22,21 @@ async function registation(req, res) {
         password: hash,
       });
       await Users.save();
+      let Otp = `${Math.floor(1000 + Math.random() * 9000)}`;
+      let otpsent = await userSchema.updateOne(
+        { email },
+        { $set: { otp: Otp } },
+        { new: true }
+      );
+      setTimeout(async () => {
+        await userSchema.updateOne(
+          { email },
+          { $set: { otp: null } },
+          { new: true }
+        );
+      }, 60000);
+      sendEmailer(email, Otp);
+
       res
         .status(201)
         .send({ msg: 'User Registation succesfull !', data: Users });
@@ -48,9 +65,23 @@ async function Adminregistation(req, res) {
         Roll,
       });
       await Users.save();
+      let Otp = `${Math.floor(1000 + Math.random() * 9000)}`;
+      let otpsent = await userSchema.updateOne(
+        { email },
+        { $set: { otp: Otp } },
+        { new: true }
+      );
+      setTimeout(async () => {
+        await userSchema.updateOne(
+          { email },
+          { $set: { otp: null } },
+          { new: true }
+        );
+      }, 60000);
+
       res
         .status(201)
-        .send({ msg: 'User Registation succesfull !', data: Users });
+        .send({ msg: 'Admin Registation succesfull !', data: Users });
     });
   } catch (error) {
     console.log(error);
@@ -60,6 +91,9 @@ async function Adminregistation(req, res) {
 async function login(req, res) {
   let { email, password, Roll } = req.body;
   let existingUser = await userSchema.findOne({ email });
+  if (existingUser.isVerify === false) {
+    return res.status(400).send({ msg: 'Please verify your email!' });
+  }
   if (existingUser) {
     bcrypt.compare(password, existingUser.password, function (err, result) {
       if (result === true) {
@@ -126,5 +160,49 @@ async function adminUsers(req, res) {
     return res.status(500).send({ msg: 'Server error' });
   }
 }
+async function otpVerify(req, res) {
+  let { email, OTP } = req.body;
+  let verify = await userSchema.findOne({ email });
+  if (!verify) {
+    return res.status(404).send('User not found!');
+  }
+  if (verify.otp === OTP) {
+    verify.isVerify = true;
+    await verify.save();
+    return res.send({ msg: 'Email verfiy succesfull !' });
+  } else {
+    return res.send({ msg: 'Invaild Otp ! please resent it ' });
+  }
+}
+async function resntOTP(req, res) {
+  let { email } = req.body;
+  let Again_mail = await userSchema.findOne({ email });
+  if (!Again_mail) {
+    return res.status(404).send({ msg: 'User not found!' });
+  }
+  let Otp = `${Math.floor(1000 + Math.random() * 9000)}`;
+  let otpsent = await userSchema.updateOne(
+    { email },
+    { $set: { otp: Otp } },
+    { new: true }
+  );
+  setTimeout(async () => {
+    await userSchema.updateOne(
+      { email },
+      { $set: { otp: null } },
+      { new: true }
+    );
+  }, 60000);
+  sendEmailer(email, Otp);
+  return res.send({ msg: 'otp resnt successfull' });
+}
 
-module.exports = { registation, Adminregistation, login, alluser, adminUsers };
+module.exports = {
+  registation,
+  Adminregistation,
+  login,
+  alluser,
+  adminUsers,
+  otpVerify,
+  resntOTP,
+};
