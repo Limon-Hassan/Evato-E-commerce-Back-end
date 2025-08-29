@@ -8,6 +8,7 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('uploads'));
+app.use(express.static('productPhoto'));
 app.use(router);
 dbConnection();
 app.get('/', (req, res) => {

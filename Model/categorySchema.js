@@ -9,21 +9,22 @@ var CategorySchema = new mongoose.Schema(
     },
     discription: {
       type: String,
+      require: true,
     },
+    Product: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Products',
+      },
+    ],
     image: {
       type: Array,
       required: true,
     },
-    product: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'product',
-      },
-    ],
   },
   {
     timestamps: true,
   }
 );
 
-module.exports = mongoose.model('Category', CategorySchema);
+module.exports = mongoose.model('category', CategorySchema);
